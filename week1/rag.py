@@ -37,8 +37,7 @@ QUESTION = (
 
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
-
+YOUR_SYSTEM_PROMPT = "You are a helpful coding assistant. Use only the provided API documentation to write the requested function."
 
 # For this simple example
 # For this coding task, validate by required snippets rather than exact string
@@ -56,7 +55,7 @@ def YOUR_CONTEXT_PROVIDER(corpus: List[str]) -> List[str]:
 
     For example, return [] to simulate missing context, or [corpus[0]] to include the API docs.
     """
-    return []
+    return [corpus[0]]
 
 
 def make_user_prompt(question: str, context_docs: List[str]) -> str:

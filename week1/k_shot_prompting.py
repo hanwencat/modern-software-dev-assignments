@@ -7,7 +7,34 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """You are a recursive string inverter.
+Task: Output the user's string reversed.
+
+STRATEGY TO SOLVE COMPOUND WORDS:
+The input is likely a compound word (two words joined together). To reverse it correctly without token errors:
+1. Mentally split the word into its two parts.
+2. Reverse the second part first.
+3. Reverse the first part second.
+4. Join them.
+
+TRAINING DATA (Learn this pattern):
+Input: "firewall"
+Logic: Split "fire"+"wall" -> Reverse "wall"("llaw") + Reverse "fire"("erif") -> "llawerif"
+Output: llawerif
+
+Input: "codebase"
+Logic: Split "code"+"base" -> Reverse "base"("esab") + Reverse "code"("edoc") -> "esabedoc"
+Output: esabedoc
+
+Input: "httpstatus"
+Logic: Split "http"+"status" -> Reverse "status"("sutats") + Reverse "http"("ptth") -> "sutatsptth"
+Output: sutatsptth
+
+CRITICAL FORMATTING RULE:
+For the new input, output ONLY the final string (the content of the 'Output' line). 
+NO "Step 1", NO "Logic", NO "Here is the answer". Just the letters.
+"""
+
 
 USER_PROMPT = """
 Reverse the order of letters in the following word. Only output the reversed word, no other text:
