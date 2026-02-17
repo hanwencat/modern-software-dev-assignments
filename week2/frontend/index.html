@@ -13,6 +13,10 @@
       .item { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; }
       .muted { color: #6b7280; font-size: 0.875rem; }
       .row { display: flex; gap: 0.5rem; align-items: center; }
+      .notes-section { margin-top: 2rem; border-top: 1px solid #e5e7eb; padding-top: 1rem; }
+      .note-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.375rem; padding: 0.75rem; margin-bottom: 0.5rem; }
+      .note-card .note-meta { color: #6b7280; font-size: 0.75rem; margin-bottom: 0.25rem; }
+      .note-card .note-content { white-space: pre-wrap; font-size: 0.875rem; }
     </style>
   </head>
   <body>
@@ -24,20 +28,29 @@
     <div class="row">
       <label class="row"><input id="save_note" type="checkbox" checked /> Save as note</label>
       <button id="extract">Extract</button>
+      <button id="extract-llm">Extract LLM</button>
+      <button id="list-notes">List Notes</button>
     </div>
 
     <div class="items" id="items"></div>
+    <div class="notes-section" id="notes-section" style="display:none;">
+      <h2 style="font-size:1.2rem;">All Notes</h2>
+      <div id="notes-list"></div>
+    </div>
 
     <script>
       const $ = (sel) => document.querySelector(sel);
       const itemsEl = $('#items');
-      const btn = $('#extract');
-      btn.addEventListener('click', async () => {
+
+      /* ------------------------------------------------------------------ */
+      /* Shared helper: call an extraction endpoint and render the results   */
+      /* ------------------------------------------------------------------ */
+      async function doExtract(endpoint) {
         const text = $('#text').value;
         const save = $('#save_note').checked;
         itemsEl.textContent = 'Extracting...';
         try {
-          const res = await fetch('/action-items/extract', {
+          const res = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text, save_note: save }),
@@ -65,8 +78,41 @@
           console.error(err);
           itemsEl.textContent = 'Error extracting items';
         }
-      });
+      }
 
+      /* Heuristic extraction (original) */
+      $('#extract').addEventListener('click', () => doExtract('/action-items/extract'));
+
+      /* LLM-powered extraction (TODO 4) */
+      $('#extract-llm').addEventListener('click', () => doExtract('/action-items/extract-llm'));
+
+      /* ------------------------------------------------------------------ */
+      /* List Notes button (TODO 4)                                         */
+      /* ------------------------------------------------------------------ */
+      $('#list-notes').addEventListener('click', async () => {
+        const section = $('#notes-section');
+        const listEl = $('#notes-list');
+        listEl.textContent = 'Loading...';
+        section.style.display = 'block';
+        try {
+          const res = await fetch('/notes');
+          if (!res.ok) throw new Error('Request failed');
+          const notes = await res.json();
+          if (notes.length === 0) {
+            listEl.innerHTML = '<p class="muted">No notes saved yet.</p>';
+            return;
+          }
+          listEl.innerHTML = notes.map(n => (
+            `<div class="note-card">` +
+              `<div class="note-meta">Note #${n.id} &mdash; ${n.created_at}</div>` +
+              `<div class="note-content">${n.content}</div>` +
+            `</div>`
+          )).join('');
+        } catch (err) {
+          console.error(err);
+          listEl.textContent = 'Error loading notes';
+        }
+      });
     </script>
   </body>
   </html>
